@@ -1,0 +1,379 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% RAPPORT DE PROJET zz2 2017-2018
+% projet : Multiplication de matrices avec MapReduce
+% tuteurs : Radu Ciucanu (radu.ciucanu@uca.fr)/Pascal Lafourcade (pascal.lafourcade@uca.fr)/Mathieu Giraud (mathieu.giraud@uca.fr)
+% auteurs : Rodrigue Abbe (rodrigue.abbe@etu.uca.fr)/Baptiste Martinez (baptiste.martinez@etu.uca.fr)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[a4paper, 11pt]{article}
+
+\input{input/preambule}
+\input{input/config}
+
+\title{Multiplication de matrices avec MapReduce}
+\author{	Rodrigue \textsc{Abbe}\\Baptiste \textsc{Martinez}}
+\def\subject{Modélisation informatique et simulation}
+
+% métadonnées
+\input{|"model/metadata.sh input/resume.tex"}
+
+\begin{document}
+
+
+%%% TITLE PAGE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand{\thepage}{}
+\thispagestyle{plain}
+
+\maketitle
+\shipout\null
+%%% SPECIAL THANKS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\newpage
+%\thispagestyle{plain}
+
+%\ 
+%\vspace{5cm}
+%\begin{flushright}
+	%Une pensée pour...
+%\end{flushright}
+%\vspace{10cm}
+%\ 
+
+%%% THANKS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\thispagestyle{plain}
+\pagenumbering{roman}
+
+\ 
+\vfill
+\section*{Remerciements}
+\addcontentsline{toc}{section}{Remerciements}
+
+\input{input/thanks}
+
+\vfill
+\ 
+
+%%% ABSRACT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\thispagestyle{plain}
+
+\section*{Résumé -- Abstract}
+\addcontentsline{toc}{section}{Résumé -- Abstract}
+	\input{|"model/resume.sh input/resume.tex"}
+
+%%% TABLE OF CONTENTS %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\thispagestyle{plain}
+
+\tableofcontents{}
+\addcontentsline{toc}{section}{Table des matières}
+
+%%% LIST OF FIGURES AND TABLES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\thispagestyle{plain}
+
+\section*{Liste des figures, tableaux, algorithmes et extraits de code}
+\addcontentsline{toc}{section}{Liste des figures, tableaux, algorithmes et extraits de code}
+\listoffigures
+%\listoftables
+\listofalgorithms
+%\lstlistoflistings
+
+%%% GLOSSARY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\thispagestyle{plain}
+
+\section*{Glossaire}
+\addcontentsline{toc}{section}{Glossaire}
+	\input{|"model/gloss.sh"}
+
+%%% INTRODUCTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\renewcommand{\thepage}{\arabic{page}}
+\setcounter{page}{1}
+
+\section{Introduction}
+\input{input/intro}
+
+%%% TEXT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% ----------------------------------------------------------------------
+% Introduction de l'étude
+% ----------------------------------------------------------------------
+\part{Introduction de l'étude}
+%\setcounter{section}{0}
+\section{Hadoop, MapReduce ? Qu'est-ce que c'est ?}
+\input{part/hadoop-intro}
+
+\section{Exemple de multiplication de matrices par MapReduce}
+\input{part/exemple}
+
+\section{Le cryptosystème de Paillier}
+\input{part/Paillier}
+\section{Multiplication sécurisée de matrices via MapReduce}
+\input{part/secure-mult-mat}
+
+% ----------------------------------------------------------------------
+% Mise en place du cluster
+% ----------------------------------------------------------------------
+\part{Mise en place du cluster}
+%\setcounter{section}{0}
+\input{part/demarrage-cluster}
+
+% ----------------------------------------------------------------------
+% Erreurs obtenues et résolutions
+% ----------------------------------------------------------------------
+\part{Erreurs obtenues et résolutions}
+%\setcounter{section}{0}
+%\addcontentsline{toc}{section}{Liste des erreurs obtenues}
+\input{part/erreurs}
+
+% ----------------------------------------------------------------------
+% Mesures et résultats
+% ----------------------------------------------------------------------
+\part{Mesures et résultats}
+%\setcounter{section}{0}
+\input{part/result}
+
+% ----------------------------------------------------------------------
+% Diagramme de Gantt réel
+% ----------------------------------------------------------------------
+\part{Diagrammes de Gantt}
+%\includegraphics[
+%    page=1,
+%    width=\textwidth,
+%    height=\textheight
+%]{img/gantt-previ_cropped.pdf}
+\includepdf[pages=-,scale=0.7, angle=90,pagecommand={\section{Diagramme prévisionnel}},height=\textheight, width=\textwidth]{img/gantt-previ_cropped.pdf}
+\clearpage
+
+%\includegraphics[
+%    page=1,
+%    height=\textheight,
+%    width=\textwidth,
+%    angle=90
+%]{img/gantt-previ_cropped.pdf}
+\includepdf[pages=-,scale=0.7, angle=90,pagecommand={\section{Diagramme réel}},height=\textheight, width=\textwidth]{img/gantt-cropped.pdf}
+
+%%% CONCLUSION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bookmarksetup{startatroot}
+\addtocontents{toc}{\bigskip}
+\newpage
+%\setcounter{section}{0}
+\section{Conclusion}
+\input{part/conclu}
+
+%%% BIBLIOGRAPHY %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newpage
+\thispagestyle{plain}
+\pagenumbering{alph}
+
+\section*{Références bibliographiques}
+
+\addcontentsline{toc}{section}{Références bibliographiques}
+\nocite{*}
+\printbibliography
+
+
+%%% ANNEXES %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+\newpage
+\pagenumbering{Roman}
+\part{Annexe}
+
+\section{Documentation des scripts et programmes réalisés}
+
+	\subsection{Script automatisant un job MapReduce sur le cluster: clusterLauncher.sh}
+    \label{clusterlauncher}
+  	\begin{center}
+        \includegraphics[scale=0.38, angle=90]{./img/codeClusterLauncherOSNS.png}
+        \begin{turn}{90}
+        \begin{minipage}{\linewidth}
+        \vspace{2\baselineskip}
+        Ce bash permet le lancement d'une multiplication de matrices avec MapReduce en une seule étape sur le cluster. Il prend en paramètre le nombre de lignes/colonnes que doivent posséder les matrices à générer.
+		\end{minipage}
+        \end{turn}
+    \end{center}
+    
+	\subsection{Installation automatique d'hadoop dans une VM vierge: hadoopFromScratch.sh}
+    \vspace{2\baselineskip}
+    \label{hfs1}
+  	\begin{center}
+        \includegraphics[scale=0.7, angle=90]{./img/hfs1.png}
+    \end{center}
+    \vspace{2\baselineskip}
+    \clearpage
+
+    \label{hfs2}
+  	\begin{center}
+        \includegraphics[scale=0.75, angle=90]{./img/hfs2.png}
+    \end{center}
+    \vspace{2\baselineskip}
+
+    \label{hfs3}
+  	\begin{center}
+        \includegraphics[scale=0.75, angle=90]{./img/hfs3.png}
+    \end{center}   
+    
+    \label{hfs4}
+  	\begin{center}
+        \includegraphics[scale=0.7, angle=90]{./img/hfs4.png}
+    \end{center}
+    \vspace{2\baselineskip}
+    \clearpage    
+    
+    \subsection{Script permettant le lancement d'un job MapReduce en local: launcher.sh}    
+    \label{launcher1}
+    \begin{flushleft}
+    \includegraphics[scale=0.45, angle=0]{./img/codeLauncherP1.png}
+    \end{flushleft}
+    
+    \label{launcher2}
+        \includegraphics[scale=0.65, angle=0]{./img/codeLauncherP2.png}
+        \vspace{1\baselineskip}
+        
+Ce script nécessite un PC possédant le système d'exploitation Linux et Hadoop. Si cela n'est pas déjà fait, il est possible de tout installer et configurer grâce au script \textit{hadoopFromScratch.sh}. Ce bash permet le lancement d'une multiplication de matrices avec MapReduce en une seule étape. Il prend en paramètre le nombre de lignes/colonnes que doivent posséder les matrices à générer.
+
+Jusqu'à la compilation des fichiers Java, il s'agit des mêmes lignes de code que le fichier \textit{hadoopFromScratch} (cf. \ref{hfs1})
+\clearpage
+    
+    \subsection{Automatisation des calculs statistiques: Stat.sh}
+    \vspace{2\baselineskip}
+    \label{Stat.sh}
+  	\begin{center}
+        \includegraphics[scale=0.8, angle=0]{./img/scriptStat.png}
+    \end{center}
+\clearpage
+
+	\subsection{Générer des matrices aléatoires: crmfs.c}
+    \vspace{2\baselineskip}
+    \label{crmfs.c}
+  	\begin{center}
+        \includegraphics[scale=0.6, angle=0]{./img/crmfs.png}
+    \end{center}
+    \vspace{2\baselineskip}
+    Ce code permet de générer une matrice dans un fichier sans extension sous la forme de plusieurs vecteurs. Une fois compilé, le fichier exécutable nécessite deux arguments: le nombre de lignes/colonnes d'une matrice et son nom. Le nom de la matrice permet de remplir la première chaîne de caractères de chaque vecteur et de nommer le fichier résultant de la fonction. Chaque matrice générée est carrée et comprend des nombres aléatoires d'entiers compris entre 0 et 9.
+\clearpage
+
+%	\subsection{Mapper du job Mapreduce One Step non sécurisé: Map.java}
+%    \vspace{2\baselineskip}
+%    \label{mapns}
+%  	\begin{center}
+%        \includegraphics[scale=0.65, angle=0]{./img/MapNS.png}
+%    \end{center}
+%    \vspace{2\baselineskip}
+%\clearpage	
+	
+%	\subsection{Mapper du job Mapreduce One Step sécurisé: Map.java}
+%    \vspace{2\baselineskip}
+%    \label{secumap}
+%  	\begin{center}
+%        \includegraphics[scale=0.65, angle=0]{./img/MapSecu.png}
+%    \end{center}
+%    \vspace{2\baselineskip}
+%\clearpage
+%	
+%	\subsection{Driver commun aux jobs sécurisés et non sécurisés: MatrixMultiply.java}
+%    \vspace{2\baselineskip}
+%    \label{Matmult}
+%  	\begin{center}
+%        \includegraphics[scale=0.7, angle=0]{./img/MatrixMultiplyCommun.png}
+%    \end{center}
+%	
+%	\subsection{Chiffrement de valeurs par le cryptosystème: Paillier.java}
+%    \vspace{2\baselineskip}
+%    \label{paillier1}
+%  	\begin{center}
+%        \includegraphics[scale=0.6, angle=90]{./img/Paillier1.png}
+%    \end{center}
+%    \vspace{2\baselineskip}
+%    \clearpage
+%    
+%    \vspace{2\baselineskip}
+%    \label{paillier2}
+%  	\begin{center}
+%        \includegraphics[scale=0.6, angle=90]{./img/Paillier2.png}
+%    \end{center}
+%    \vspace{2\baselineskip}
+%    \clearpage
+%    
+%    \vspace{2\baselineskip}
+%    \label{paillier3}
+%  	\begin{center}
+%        \includegraphics[scale=0.8, angle=90]{./img/Paillier3.png}
+%    \end{center}
+%    \vspace{2\baselineskip}
+%    \clearpage
+%    
+%	\subsection{Reducer du job Mapreduce One Step non sécurisé: Reduce.java}
+%    \vspace{2\baselineskip}
+%    \label{reduceNS}
+%  	\begin{flushleft}
+%        \includegraphics[scale=0.7, angle=0]{./img/ReduceNS.png}
+%    \end{flushleft}
+%    
+%    \subsection{Reducer du job Mapreduce One Step sécurisé: Reduce.java}
+%    \vspace{2\baselineskip}
+%    \label{reduceSecu}
+%  	\begin{center}
+%        \includegraphics[scale=0.9, angle=90]{./img/ReduceSecu.png}
+%    \end{center}
+%
+%    \label{reduceSecu}
+%  	\begin{center}
+%        \includegraphics[scale=0.7, angle=90]{./img/ReduceSecu2.png}
+%    \end{center}
+%    \vspace{2\baselineskip}
+%    \clearpage
+    
+    \subsection{Calcul des moyennes, écarts-types et variances: Stat.java}
+    \vspace{2\baselineskip}
+    \label{stat1}
+  	\begin{center}
+        \includegraphics[scale=0.9, angle=90]{./img/Stat1.png}
+    \end{center}
+    \vspace{2\baselineskip}
+    \clearpage
+    
+    \vspace{2\baselineskip}
+    \label{stat2}
+  	\begin{center}
+        \includegraphics[scale=0.8, angle=90]{./img/Stat2.png}
+    \end{center}
+    \vspace{2\baselineskip}
+    \clearpage
+    
+\section{Mesures}
+	\subsection{séries de mesures}
+	\label{txtmesures10jobs}
+	\begin{center}
+		\includegraphics[scale=0.9, angle=0]{./img/fichier57.png}
+		Temps d'exécutions en secondes des 10 jobs lancés pour des matrices constituées de 57 lignes et colonnes.
+	\end{center}
+	
+	\subsection{moyenne des mesures pour chaque taille de matrice}
+	\label{txtmesuresMoy}
+	\begin{center}
+		\includegraphics[angle=0]{./img/extraitMoyTri.png}\par
+		Extrait du fichier stockant la taille des matrices en première colonne et la moyenne des 10 valeurs lues dans chaque fichier de mesures.
+	\end{center}
+	\clearpage
+	
+	\subsection{variance des mesures pour chaque taille de matrice}
+	\label{txtmesuresVar}
+	\begin{center}
+		\includegraphics[angle=0]{./img/extraitVariance.png}\par
+		Extrait du fichier composé des variances des échantillons de mesure calculés sur la multiplication de matrices en une étape.
+	\end{center}
+	
+	\label{txtmesures}
+	\begin{center}
+	\subsection{Courbe des benchmarks sur le job One Step}	
+	\vspace{2\baselineskip}
+	\includegraphics[
+    page=1,
+    width=15cm,
+    height=15cm,
+]{courbesOneStep.pdf}		
+	\end{center}
+\end{document}

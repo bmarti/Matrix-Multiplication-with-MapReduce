@@ -1,0 +1,24 @@
+%FR
+
+
+MapReduce permet de faire du traitement de Big Data.
+Mais les utilisateurs de MapReduce doivent, généralement, externaliser leurs données et les résultats des calculs auprès
+d'un cloud public. Mais l'externalisation implique nécessairement des problèmes de sécurité, puisque tout le monde peut avoir accès aux données du cloud. C'est dans cette problématique que M. Radu CIUCANU, M. Matthieu GIRAUD et M. Pascal LAFOURCADE se sont intéressés au problème de multiplication de matrices de manière sécurisée.
+Afin de protéger les données des utilisateurs de MapReduce, ils ont proposé des algorithmes avec certaines propriétés.
+
+\bigskip
+C'est dans ce cadre que ce projet nous a été confié par M. Radu CIUCANU, M. Matthieu Giraud et 
+M. Pascal LAFOURCADE dans le but de confirmer, par la pratique, leurs résultats théoriques obtenus lors de leurs travaux de recherche \cite{publi-tuteur} .
+
+\bigskip
+Notre travail a consisté à l'implémentation d'algorithmes en langage Java, afin de faire fonctionner un produit matriciel avec MapReduce. L'étape suivante est de mesurer les temps d'exécution du produit de matrices non chiffrés et celui des matrices chiffrés à l'aide du chiffrement de Paillier. Toutes les tâches du MapReduce devaient être automatisées par l'exécution de scripts bash que nous avons implémenté.
+
+\bigskip
+Il est courant d'entendre dans le domaine du \textit{Big Data} qu'il existe un dilemme entre la sécurité des données et la complexité du temps de calcul. Le volume des données stockés partout dans le monde augmente exponentiellement. Cependant, un problème persiste encore dans cette évolution, nous ne sommes actuellement pas capables de garantir la protection des données stockées dans un cloud. Une des causes principales est le temps de chiffrement de celles-ci, des calculs peuvent nécessiter un résultat rapide et une sécurité exigeante.\par
+
+\bigskip
+Afin de présenter au mieux ce projet, nous introduisons l'univers d'Hadoop et de MapReduce dès le départ, suivi par un exemple simple; nous permettant d'expliquer le fonctionnement des algorithmes utilisés pour le calcul.\par
+Dans une deuxième partie, nous abordons la mise en place d'un cluster Hadoop sur la plateforme Galactica du LIMOS. Ceci permet de compléter en partie la documentation disponible sur la plateforme. Nous consacrons une brève partie portant sur les configurations, que nous établissons dès le premier démarrage du cluster.\par 
+La partie III est la suite logique de la partie précédente, en effet, nous exposons les nombreux cas d'erreurs auxquels nous avons été confrontés et que nous avons su résoudre. Nous avons choisi d'énumérer les problèmes les moins documentés sur Internet. Les solutions proposées permettent aux futurs utilisateurs de résoudre rapidement des problèmes qui nous ont ralenti dans l'avancement du projet.\par
+En dernier lieu, la partie IV contribuera à l'exposition des mesures effectuées pour la multiplication de matrices en une étape. Nous comparons le temps d'exécution de l'algorithme utilisant le chiffrement de Paillier pour obtenir un produit matriciel et celui n'en utilisant pas. Cette partie est notre contribution principale aux recherches menées par nos tuteurs.\par
+Nous concluons ce projet par un résumé des résultats obtenus et une rapide synthèse des difficultés que nous avons rencontré. Les perspectives envisagées pour ces études terminent cette partie.

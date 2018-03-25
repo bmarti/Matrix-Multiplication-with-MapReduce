@@ -1,0 +1,46 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% INTRODUCTION
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Le monde de l'informatique doit faire face, aujourd'hui, à une nouvelle sorte de problème: comment
+gérer l'énorme quantité de données que nous pouvons acquérir? 
+
+\noindent
+L'exemple classique est Facebook qui possède une gigantesque base de données sur plus d'un milliard d'utilisateurs dans le monde. Désormais, Facebook se demande comment stocker, organiser et retrouver des informations dans cette immense base de données.
+
+\noindent Gérer de si grands volumes de données impliquent de savoir:
+\begin{itemize}
+\item comment stocker ces informations : aucun disque dur seul n'est capable de stocker autant de données
+\item comment traiter ces données : aucune machine seule ne peut traiter autant d'informations de manière suffisamment rapide
+\end{itemize}
+\bigskip
+\noindent La solution fut d'utiliser plusieurs machines comme si elles 
+n'en formaient qu'une.\par
+Ainsi on a:
+\begin{itemize}
+\item un groupe de stockage élevé
+\item un groupe de calcul plus performant
+\end{itemize}
+\vspace{1\baselineskip}
+
+Mais pour que les différents ordinateurs agissent comme un seul, il faut que les machines soient synchronisées, c'est-à-dire qu'elles soient capables de dialoguer pour se répartir le calcul et le stockage de manière intelligente. Cet ensemble d'ordinateurs connectés entre eux, pouvant s'organiser intelligemment la charge  de travail (calcul et stockage) s'appelle \textbf{un cluster}.\par
+Chaque machine de ce cluster s'appelle \textbf{un noeud}. Dans un cluster, il existe deux types de noeuds, il y a un ou deux \textit{namenode}. Les \textit{namenodes} sont des machines stockant toutes les informations contenues et est l'épicentre de toutes les requêtes effectuées dans les \textit{datanodes}. La caractéristique des \textit{namenodes} est qu'aucune donnée du système distribué d'hadoop est stocké dans le noeud maître (i.e. \textit{namenode}. Le maître nécessite simplement beaucoup de RAM (nous avons disposé de 8Go)-, ceci afin d'accéder aux divers requêtes plus rapidement que par un accès disque dur.\par
+Le second type de noeud est appelé \textit{datanode}, il s'agit de machine virtuelle servant à stocker toutes les données. L'avantage d'un tel système est que toutes les données sont répartis dans les \textit{datanodes} et sont répliqués, par défaut 3 fois, dans différentes machines esclaves. \'Etant donné la limite de stockage de disque dur dont nous avons disposé, nous avons désactivé les réplications.\par
+Il est intéressant d'effectuer des réplications pour ne pas perdre de données, ainsi en cas de panne, un \textit{datanode} stockant le ou les fichiers perdus par la panne peut prendre le relais et continuer la tâche en cours.
+
+\noindent C'est là qu'intervient Hadoop qui nous fournit un cadre de travail pour mettre en place un tel cluster. Hadoop se structure en deux principales couches:
+\begin{itemize}
+\item \textbf{HDFS}: Hadoop Distributed File System, système de stockage, capable de gérer des
+ milliers de noeuds sans intervention d'un opérateur, adapté pour le Big Data
+\item \textbf{MapReduce} un cadre de programmation parallèle pour le Big Data, développé 
+en Java par Google. Dans certaines versions, cette couche est divisée en deux:
+\begin{itemize}
+\item YARN: Yet Another Resource Negociator, qui gère la puissance de calcul et la répartition de la charge entre les machines d'un cluster
+\item MapReduce, qui gère l'implémentation de l'algorithme de MapReduce
+\end{itemize}
+\end{itemize}
+Notre cluster est composé d'un \textit{namenode} et de trois \textit{datanodes}.
+%\begin{figure}[!h]
+%\centering
+%\includegraphics[width=8cm,height=4cm]{yarn.png}
+%\end{figure}

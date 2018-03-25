@@ -1,0 +1,169 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%\section{Multiplication sécurisée de matrices via MapReduce}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+L'objectif étant la multiplication de matrices de manière sécurisée via MapReduce, 
+comment peut-on lier la multiplication de matrices via MapReduce et le cryptosystème de Paillier?
+C'est à cette question que nos tuteurs ont répondu dans leurs travaux de recherches \cite{publi-tuteurs} et que l'on va
+présenter dans cette section.\par
+\vspace{1\baselineskip}
+Pour multiplier les matrices tout en gardant la confidentialité des données, avec MapReduce,
+2 approches sont possibles.
+\begin{itemize}
+\item une approche privée et sécurisée (SP);
+\item une approche privée et sécurisée, résistante aux chocs entre le map et le reduce (CRSP).
+\end{itemize}
+\littlesectionspace
+Ces approches respectent les propriétés suivantes:
+\begin{itemize}
+\item l'utilisateur ne peut apprendre aucune information sur les matrices initiales M et N;
+\item aucune machine s'occupant des données de la matrice M, ne peut apprendre des informations 
+sur la matrice N;
+\item aucune machine s'occupant des données de la matrice N, ne peut apprendre des informations 
+sur la matrice M;  
+\item aucune machine s'occupant du résultat de la multiplication de matrice $P= MN$ , ne peut 
+apprendre des informations sur les matrices M,N et P.
+\end{itemize}
+Dans le cadre de notre projet, nous nous sommes uniquement intéressés à l'approche sécurisée et privée.
+\vspace{1\baselineskip}
+
+\subsection{Approche sécurisée et privée MapReduce Two Steps}
+
+En plus d'utiliser le cryptosystème de Paillier, on ajoute un masque aléatoire pour assurer la confidentialité des éléments des matrices.
+En effet, tous les éléments $m_{ij}$ de la matrice M sont cryptés via le cryptosystème de Paillier avec la clé public de l'utilisateur $pk$. 
+De plus, ils masquent les éléments de la matrice N $n_{ij}$  en  leur ajoutant un nombre aléatoire  $\tau_{jk} \in {Z}_{n}$, 
+également crypté mais avec une autre clé $pk_{2}$.
+L'algorithme~\ref{algo_map1_SP} est associé à cette fonction.
+\begin{algorithm}[H]
+  \caption{Map SP round 1}
+  \label{algo_map1_SP}
+  \begin{algorithmic}
+    \Require{matrices M et N}
+    \Ensure{Liste de paires (clé, valeur)}
+    \ForAll {$ m_{ij}$}
+    \State Créer la paire $(j,[M,i,\epsilon_{pk}(m_{ij})])$
+    \EndFor
+    \ForAll {$ n_{jk}$}
+    \State Créer la paire (j,[N,k, $n_{jk}$ + $\tau_{jk}$, $\epsilon_{pk_{2}}(\tau _{jk})$])
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
+
+Dans l'algorithme~\ref{algo_Reduce1_SP}, qui correspond à la première fonction reduce version sécurisée, il y'a aussi de nombreux changements.
+Elle regroupe toujours les éléments qui ont la même clé $(i,k)$ , mais elle crée, cette fois-ci, comme valeur le tuple: ($\epsilon_{pk}(m_{ij})^{n_{jk} + \tau_{jk}}$ , $ \epsilon_{pk}(m_{ij})$ , $\epsilon_{pk_{2}}(\tau _{jk}$)
+\littlesectionspace
+\begin{algorithm}[H]
+  \caption{Reduce SP round 1}
+  \label{algo_Reduce1_SP}
+  \begin{algorithmic}
+    \Require{liste de paires \\  
+    (j,[M,i,$\epsilon_{pk}(m_{ij})$]) ,(j,[N,k,$n_{jk} + \tau _{jk}, \epsilon_{pk_{2}}(\tau_{jk})$])}
+	\\						  
+    \Ensure{Liste  (cl\'{e}, liste de valeurs) \\ 
+				   ((i,k), $\epsilon_{pk}(m_{ij})^{n_{jk} + \tau _{jk}}$,$ \epsilon_{pk}(m_{ij})$,$\epsilon_{pk_{2}}(\tau _{jk})$)}
+    \\
+    \ForAll { (j,[M,i,$\epsilon_{pk}(m_{ij})$]), (j,[N,k,$\epsilon_{pk}(n_{jk})$])}
+    \State Cr\'{e}er  
+			\[
+				((i,k), \epsilon_{pk}(m_{ij})^{n_{jk} + \tau _{jk}}, \epsilon_{pk}(m_{ij}),\epsilon_{pk_{2}}(\tau _{jk}))
+			\]
+		
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
+
+Comme dans la version non sécurisée le deuxième map n'a pas grand intérêt vu qu'il renvoie la même sortie que la première fonction reduce.
+La deuxième fonction reduce multiplie toutes les valeurs qui  porte la même clé $(i,k)$ et permet d'enlever les masques $\epsilon_{pk_{2}}(\tau_{jk})$, afin 
+d'obtenir $\epsilon_{pk}( m_{ij} \times n_{kj})$, comme expliqué ci dessous et dans l'algorithme ci-dessous.
+\littlesectionspace
+\begin{algorithm}[H]
+  \caption{Reduce SP round 2}
+  \label{algo_Reduce2_SP}
+  \begin{algorithmic} 
+    \Require{Liste (cl\'{e}, liste de valeurs ) ((i,k), $\epsilon_{pk}(m_{ij})^{n_{jk} + \tau _{jk}}$,$ \epsilon_{pk}(m_{ij})$,$\epsilon_{pk_{r2}}(\tau _{jk})$)} 
+    \Ensure{Liste de paires (cl\'{e}, valeur) ((i,k), $\epsilon_{pk}(\sum_{j}$ $m_{ij}$ $\times$ $n_{jk})$)}
+    \ForAll { clé (i,k)}
+    \State 
+			\[
+                   \prod_{j} \frac{ \epsilon_{pk}(m_{ij})^{n_{jk} + \tau _{jk}} }{ \epsilon_{pk}(m_{ij}^{\Delta_{sk_{r2}}(\epsilon_{pk_{r2}}(\tau_{jk}))}) }
+             \]      
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
+
+\bigskip
+On utilise les propriétés homomorphiques du cryptosystème de Paillier pour récupérer :
+\begin{center}
+$\epsilon_{pk}(\sum_{j} m_{ij} \times n_{jk})$
+\end{center}
+En effet:
+%%
+\[
+	 \prod_{j} \frac{ \epsilon_{pk}(m_{ij})^{ n_{jk} + \tau_{jk} } }{ \epsilon_{pk}(m_{ij})^{\Delta_{sk_{r2}}(\epsilon_{pk_{r2}}(\tau_{jk}))}} =
+	 %%
+	  \prod_{j} \frac{ \epsilon_{pk}(m_{ij})^{n_{jk}} \times \epsilon_{pk}(m_{ij})^{\tau_{jk}} }{ \epsilon_{pk}(m_{ij})^{\tau_{jk}} } =
+	 %%
+	  \prod_{j} \epsilon_{pk}(m_{ij} \times  n_{jk}) =
+	  %%
+	  \epsilon_{pk}( \sum_{j} m_{ij} \times n_{jk}) 
+\]
+
+\subsection{Approche sécurisée et privée MapReduce One Step}
+
+Dans la version One Step, il n'y a pas besoin de masquer les données provenant de la matrice N, vu qu'il n'y a qu'une seule fonction reduce.  
+La fonction map chiffre seulement les données de la matrice M avec la clé publique de l'utilisateur. La fonction est décrite par l'algorithme~\ref{algo_map_OneStep_SP}
+
+\begin{algorithm}[H]
+  \label{algo_map_OneStep_SP}
+  \begin{algorithmic}
+    \Require{matrices M et N}
+    \Ensure{Liste de paires (cl\'{e}, valeur)}
+    \ForAll {$ m_{ij}$}
+    \State \ForAll {k ,colonne de N}
+    \State Cr\'{e}er la paire $((i,k),[M,j,\epsilon_{pk}(m_{ij})])$
+    \EndFor
+    \EndFor
+    \ForAll {$ n_{jk}$}
+	\State \ForAll {i ,ligne de M}
+    \State Cr\'{e}er la paire $((i,k),[N,j,n_{jk}])$
+    \EndFor
+    \EndFor
+  \end{algorithmic}
+\caption{Map SP}
+\end{algorithm}
+
+En sortie de la fonction reduce nous retrouvons pour chaque clé $(i,k)$ , le produit  $m_{ij} \times n_{jk}$ chiffré par la clé publique de l'utilisateur $pk$.
+\littlesectionspace 
+\begin{algorithm}[H]
+  \caption{Reduce SP}
+  \label{algo_reduce_OneStep_SP}
+  \begin{algorithmic}
+    \Require{Liste de paires (cl\'{e}, valeur)}
+    \Ensure{Liste de paires (cl\'{e}, valeur) ((i,k),  $\epsilon_{pk}$ ( $\sum_{k}$ $m_{ij}$ $\times$ $n_{jk}$))}
+    \ForAll {$ (i,k)$}
+    \State Cr\'{e}er une liste triée selon j de $[M,j,\epsilon_{pk}(m_{ij})]$
+    \State Cr\'{e}er une liste triée selon j de $[N,j,n_{jk}]$
+    \State Calculer
+    \[
+		\prod_{j} \epsilon_{pk}( m_{ij})^{n_{jk}}  
+	\]
+	\EndFor
+  \end{algorithmic}
+\end{algorithm}
+
+\noindent On utilise, une nouvelle fois les propriétés homomorphiques pour retrouver:\par
+\begin{center}
+$\epsilon_{pk}$ ($\sum_{k}$ $m_{ij}$ $\times$ $n_{jk}$)
+\end{center}
+
+Rappel de la propriété homomorphique utilisée:
+\[
+	\prod_{j} \epsilon_{pk}( m_{ij})^{n_{jk}}  = 
+	%%
+	\prod_{j} \epsilon_{pk}( m_{ij} \times n_{jk} ) =
+	%%
+	 \epsilon_{pk}( \sum _{j}  m_{ij} \times n_{jk}  )
+\]

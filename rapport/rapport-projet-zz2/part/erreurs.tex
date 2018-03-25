@@ -1,0 +1,114 @@
+\section{Liste des erreurs obtenues}
+\subsection{Erreurs de compilation}
+
+La compilation d'une tâche MapReduce fut un grand obstacle dans ce projet.\par
+Pourquoi cela ?\par
+Au démarrage du cluster, nous ne connaissions rien de son arborescence, nous n'étions même pas sûr du dossier dans lequel était installé hadoop.\par
+\vspace{1\baselineskip}
+La première erreur, aussi basique soit-elle, était due à la non-existence des \textit{packages} importés dans les fichiers Java.\par
+
+\begin{ttfamily}\small
+>>javac MatrixMultiply.java
+\par MatrixMultiply.java:4:\par
+error: package org.apache.hadoop.mapreduce does not exist\par
+import org.apache.hadoop.mapreduce.*;\par
+\^{}\par
+1 error
+\end{ttfamily}
+
+Pour remédier à ce problème, il n'y a pas d'autre solution que de chercher le chemin absolu de l'archive Jar contenant les classes qui nous étaient nécessaires pour compiler puis exécuter la multiplication de matrices.\par
+Une fois trouvé, nous utilisons l'option \textit{-cp} suivie du chemin absolu du ou des archives Jar séparés par ": ", si tout va bien vous n'aurez plus d'erreur au niveau des importations.
+\vspace{1.5\baselineskip}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Erreurs d'exécution de la tâche MapReduce}
+
+Dans cette partie, tous les fichiers java compilent correctement, le \textit{job} MapReduce est lancé,seulement, pendant son exécution une série d'exceptions peut survenir sur le terminal. Cela empêche donc le bon déroulement du calcul.\par
+Pour résoudre ces différentes erreurs, il nous a fallu effectuer des heures de recherches dans les documentations d'hadoop pour comprendre les prototypes des fonctions configurant un \textit{job} MapReduce.\par
+\vspace{1\baselineskip}
+Comme expliqué dans l'introduction décrivant le fonctionnement d'hadoop en partie I, dans une tâche MapReduce, il y a deux fonctions essentielles: le \textbf{Map} et le \textbf{Reduce}. Chacune de ces fonctions a ses particularités et admet différentes entrées en paramètre pour émettre différentes sorties.\par
+Concernant le Map, nous avons appris que la clé d'un vecteur en entrée devait être une instance de la classe \textbf{LongWritable} d'hadoop. Il est alors nécessaire d'adapter la configuration des paramètres d'entrée dans le driver (i.e. fichier dirigeant l'exécution du programme) de la tâche. Si par malheur, une clé de la classe \textbf{Text} était en entrée d'une fonction Map, nous obtenions une exception de la classe \textit{java.lang} indiquant précisément:\par
+\vspace{0.5\baselineskip}
+
+\begin{ttfamily}
+java.lang.ClassCastException: org.apache.hadoop.io.LongWritable\par cannot be cast to org.apache.hadoop.io.Text
+\end{ttfamily}\par
+\vspace{0.5\baselineskip}
+
+\textit{A contrario}, le Reduce prend en entrée une clé de la classe Text, sans quoi l'erreur opposée est retournée.\par
+Dans les deux fonctions, la valeur du vecteur est une instance de la classe Text.\par
+\vspace{1\baselineskip}
+
+Un autre problème concernait la méthode \textbf{context.write}, fonction permettant l'écriture du résultat dans un fichier pouvant être lu par la fonction suivante. Cette méthode accepte deux arguments, deux objets de type Text uniquement. Maintenant, pour la fonction Reduce, il est possible laisser le premier argument à NULL. Cependant, ce n'est pas le cas du Map, mettre à NULL le premier paramètre conduisait à l'exception \textbf{NullPointerException}. La raison est très simple, le premier paramètre est la clé en sortie, le second paramètre est la valeur en sortie. Donc, la dernière fonction de Reduce d'une tâche comprend toujours la méthode context.write avec son premier paramètre à NULL car il n'y a plus de tri sur les clés à effectuer pour le résultat.
+\vspace{1.5\baselineskip}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Erreurs du HDFS}
+
+Le HDFS affiche beaucoup de messages du type \textit{warning} mais fonctionne tout de même. C'est d'ailleurs ce qui différencie un warning d'une erreur.\par
+\vspace{1\baselineskip}
+
+Un message apparaît systématiquement dès que nous souhaitons communiquer par une commande avec le système distribué d'hadoop:
+\vspace{0.5\baselineskip}
+
+\begin{ttfamily}
+WARN util.NativeCodeLoader: Unable to load native-hadoop library for your platform... using builtin-java classes where applicable
+\end{ttfamily}\par
+\vspace{0.5\baselineskip}
+
+Comme l'indique le début du message, il s'agit d'un \textit{warning}, donc nous savons qu'il n'influe pas sur le fonctionnement de nos commandes.\par
+\vspace{1\baselineskip}
+
+Par la suite, nous avons eu des problèmes pour utiliser les commandes HDFS traitant les fichiers déjà stockés à l'intérieur. L'utilisateur par défaut du cluster est appelé ubuntu, cependant le \textbf{propriétaire} du dossier HDFS est l'utilisateur hadoop. Il a donc été nécessaire de créer un utilisateur hadoop dans le HDFS pour utiliser toutes les commandes dont nous avions besoin. Nous avons donc créé un dossier \textit{hadoop} imbriqué dans un dossier \textit{user} dans le HDFS.\par
+Les commandes nécessaires pour créer l'utilisateur hadoop étaient les suivantes:\par
+\vspace{0.5\baselineskip}
+
+\begin{ttfamily}
+sudo -u hadoop /opt/hadoop/bin/hdfs dfs -mkdir user\par
+sudo -u hadoop /opt/hadoop/bin/hdfs dfs -mkdir hadoop
+\end{ttfamily}\par
+\vspace{0.5\baselineskip}
+\`A partir de ce moment, nous pouvions utiliser la commande hdfs et son option -put pour y insérer des fichiers.
+\vspace{1\baselineskip}
+
+Une des erreurs à laquelle nous avons été confronté apparaissait lors de l'insertion des matrices du disque dur du \textit{namenode} vers le HDFS.
+En utilisant la commande suivante permettant l'insertion d'une matrice M située dans le dossier local vers la racine du HDFS:\par
+\vspace{0.5\baselineskip}
+
+\begin{ttfamily}
+sudo -u hadoop /opt/hadoop/bin/hdfs dfs -put M hdfs://10.0.1.35:9000/
+\end{ttfamily}\par
+\vspace{0.5\baselineskip}
+
+N.B. : L'adresse ip \textbf{10.0.1.35} est l'adresse du \textit{namenode} dans le réseau interne au cluster, le \textbf{port 9000} est celui qui établit la connexion entre le \textit{namenode} et chacun des \textit{datanodes}.
+L'option -put de la commande dfs permet de copier un fichier d'un dossier local vers le HDFS.\par
+\vspace{1\baselineskip}
+En appelant cette dernière commande, une erreur pouvait apparaître si un fichier du même nom était déjà présent dans le même dossier de destination du HDFS. L'erreur suivante interrompait le script de lancement:\par
+\vspace{0.5\baselineskip}
+
+\begin{ttfamily}
+put: M already exists
+\end{ttfamily}\par
+\vspace{0.5\baselineskip}
+
+Pour résoudre cette erreur et \textbf{écraser} le fichier déjà existant, il suffit de compléter la commande ajoutant le fichier à la suite de l'option \textit{-put}, par l'option \textit{-f}.
+\vspace{1.5\baselineskip}
+
+\subsection{Erreurs de programmation}
+
+Dans le cas de la programmation du MapReduce version sécurisée, une erreur apparaît lors de la multiplication de matrices contenant des nombres élevés, tel que:\par
+\vspace{0.5\baselineskip}
+
+$M = \begin{pmatrix} 123456789 & 123456789 \\ 123456789 & 123456789  \end{pmatrix}$,
+$N = \begin{pmatrix} 123456789 & 123456789 \\ 123456789 & 123456789  \end{pmatrix}$
+\vspace{0.5\baselineskip}
+
+En effet, le déchiffrage nous donne des valeurs aberrantes. Ce problème est dû au choix de la clé publique lors du chiffrement $(p,q)$.
+Il faut prendre p et q suffisamment grand pour s'affranchir du modulo, qu'impose la propriété de la multiplication homomorphique : 
+\[
+	\epsilon_{pk}(m_{ij})^{n_{jk}}=\epsilon_{pk}(m_{ij} \cdot m_{jk} \mod n)
+\] 
+Nous devons choisir n de telle sorte que $m_{ij} \cdot m_{jk} \mod n = m_{ij} \cdot m_{jk}$. \`A cause de cela, nous avons dû choisir un $n$ très grand. Or, $n = p \times q$.
+Nous avons donc choisi: $p= 1000000005721$ et $q= 1000000005713$ , deux nombres premiers comme le demande le cryptosystème de Paillier.

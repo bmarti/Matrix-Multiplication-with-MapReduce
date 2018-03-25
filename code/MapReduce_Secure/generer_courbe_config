@@ -1,0 +1,6 @@
+set terminal jpeg
+set output "Courbe.jpg"
+set title 'Temps d'execution du MapReduce en fonction de la taille des matrices d'entrees'
+set xlabel 'taille de la matrice'
+set ylabel 'temps (s)'
+plot "donnee.dat" using 1:2 

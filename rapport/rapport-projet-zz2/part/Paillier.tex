@@ -1,0 +1,55 @@
+Le Cryptosystème de Paillier est un cryptosystème basé sur un chiffrement asymétrique,(création d'une clé publique et privée) conçu par Pascal Paillier. 
+
+\subsection{Génération de la paire de clés}
+
+\begin{itemize}
+\item Clé publique $pk = (n,g)$
+	\begin{itemize}
+	\item $n = pq$, $pgcd(pq,(p-1)(q-1))=1$ avec p,q choisis arbitrairement;
+	\item $g \in {Z}^*_{n^2}$ où ${Z}^*_{n^2}= \left\{(z,z) \in{Z},\\ 0\le z \le n, pgcd(z,n^2)=1 \right\}$.
+	\end{itemize} 
+\item Clé privée $sk=(\lambda, \mu)$
+	\begin{itemize}
+	\item $\lambda=ppcm(p-1,q-1)$;
+	\item $\mu = (L(g^{\lambda}mod n^2))^{-1}modn$, où $L(x)=\frac{x-1}{n}$. 
+	\end{itemize}
+\end{itemize}
+\vspace{0.5\baselineskip}
+
+\subsection{Chiffrement $\epsilon_{pk}$(.)} %Les lettres grecques doivent être en mode maths (i.e. entre $)
+
+Soit $m$ un message à chiffrer avec $0 \leq m<n$. Soit $r$, un entier aléatoire tel que $0 \leq r<n$. Le chiffré est alors :
+\[
+    \epsilon _{pk}(m)=g^m \cdot r^n \mod n^2
+\]
+
+\subsection{Déchiffrement $\Delta_{sk}$(.)}
+
+Pour retrouver le texte clair $m$ à partir d'un message chiffré $c$ :
+\[
+    \Delta_{sk}(c)= L(c{\lambda} \mod n^2) \cdot \mu \mod n
+\]
+
+\section{Propriétés homomorphiques du cryptosystème de Paillier}
+
+\noindent Soit $c_1$, le message chiffré de $m_1$ et $c_2$ le message chiffré de $m_2$
+
+\subsection{Homomorphisme additif}
+La première propriété du chiffrement de Paillier est la stabilité additive. Calculer la somme de deux valeurs chiffrées est identique au chiffrement de la somme de deux valeurs déchiffrées.\par
+\[
+c_{1}\cdot c_{2} = \epsilon_{pk}(m_{1}) \cdot \epsilon_{pk}(m_{2})= \epsilon_{pk}(m_{1}+ m_{2})
+\]
+
+\subsection{Homomorphisme multiplicatif particulier}
+\[
+c_{1}^{m_2} = \epsilon_{pk}(m_{1})^{m_2}=\epsilon_{pk}(m_{1} \cdot m_2\mod n)
+\]
+
+\subsection{Exemple d'utilisation}
+Utilisation du système de Paillier pour voter lors d'un referendum. Une autorité A organise le vote et calcule le résultat. L'autorité génère un couple clef publique, clef privée via le système de Paillier.
+Si un individu veut voter "oui", il envoie le message 1 à A chiffré et 0 sinon.
+\vspace{1\baselineskip}
+
+\subsection{Pourquoi utliser le cryptosystème de Paillier?}
+L'intérêt du cryptosystème de Paillier réside dans le caractère aléatoire du chiffrement, ainsi avec un même message on peut obtenir différents messages chiffrés. Cela permet, alors, d'augmenter la sécurité et la confidentialité des données.
+ 

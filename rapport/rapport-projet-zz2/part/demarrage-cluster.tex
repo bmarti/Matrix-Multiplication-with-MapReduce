@@ -1,0 +1,24 @@
+\section{Première connexion}
+
+\subsection{Configurations de base}
+Lors de la première connexion au \textit{namenode} du cluster, seul hadoop est installé. Nous ne disposons d'aucune interface graphique, toute action s'effectue sur console. Il existe deux utilisateurs par défaut, ubuntu et hadoop.\par
+Afin de naviguer plus rapidement dans les dossiers et faciliter l'exécution de certaines commandes, nous implémentons des alias dans le fichier \textit{.bashrc}.\par
+La commande \textit{hadoop} n'étant pas reconnue, il nous est nécessaire de modifier la variable d'environnement \textbf{PATH} en y ajoutant le chemin absolu du dossier d'installation d'hadoop: /opt/hadoop/\par
+Puisque nous avons aussi besoin d'importer les fichiers .class du mapper et du reducer présents dans le dossier de compilation du job, il faut ajouter "." dans le PATH.\par
+Dans l'objectif de pouvoir compiler les fichiers .c, certains \textit{packages} ont besoin d'être installés comme le kit \textbf{build-essential} contenant les fichiers \textit{stdio.h} et \textit{stdlib.h}.\par
+La dernière étape de configuration est d'installer git à l'aide de la commande \textbf{sudo apt install git}, puis d'effectuer un \textit{git clone} du dépôt que vous souhaitez importer.\par
+\vspace{0.5\baselineskip}
+
+\textsc{Remarque:} En cas d'erreur lors du \textit{git clone}, il suffit de désactiver la sécurité ssl en local de git présent sur le cluster. La commande \textit{git config --global http.sslverify.false} fera ce qu'il faut. Vous pouvez ainsi cloner votre dépôt sans encombre.\par
+\vspace{1.5\baselineskip}
+
+\subsection{Configurations plus avancées}
+
+Maintenant que votre cluster est configuré, il faut vérifier si les connexions avec les datanodes sont bien établies.\par
+En premier lieu, l'infrastructure OpenStack, que nous utilisons pour héberger le cluster, nous présente tout le réseau sous la forme d'un schéma interactif, disponible dans le tableau de bord du \textit{cloud}.\par
+
+%%%%%%%% INSERER IMAGE TOPOLOGIE DU CLUSTER %%%%%%%
+
+Par la suite, nous devons connaître les ports utilisés par le \textit{namenode} pour communiquer avec les \textit{datanodes} afin d'avoir la possibilité d’interagir avec le \textbf{HDFS} grâces aux commandes dédiées. En connaissant les adresses ip de chaque machine du réseau, il est alors possible de déterminer le port utilisé par la machine maître. Taper la commande \textit{netstat -atun} dressera la liste des ports connectés et en attente de connexion du maitre. Connaître le port vous permettra d'accéder au chemin du HDFS.
+
+%%%%%%%% INSERER IMAGE PORTS DU CLUSTER %%%%%%%

@@ -1,0 +1,248 @@
+\subsection{Multiplication de matrices via MapReduce en deux étapes}
+
+Au cours de cette section, on utlise les matrices de la figure~\ref{Matrices M et N} à titre d'exemple, pour montrer les différents résultats obtenus.
+\begin{figure}[h]
+  \begin{center}
+    $$M = \begin{pmatrix} 3 & 2 \\ 4 & 3 \\ 5 & 4 \end{pmatrix}$$
+    $$N = \begin{pmatrix}  1 & 5 & 7 \\ 2 & 6 & 8 \end{pmatrix}$$ \\
+  \end{center}
+  \caption{Matrices M et N à multiplier via Mapreduce en deux étapes}
+  \label{Matrices M et N}
+\end{figure}
+
+Avant de multiplier ces matrices, il faut savoir comment les stocker en mémoire. Une réponse possible à cette question est proposée dans \cite{Ullman}.
+Une matrice est définie par trois éléments: une colonne, une ligne et la valeur à cette ligne et colonne.
+Nous pouvons donc sauvegarder les données de M et N via ces éléments. On utilisera alors les tuples :$(i,j,m_{ij})$ et $(j,k,n_{jk})$ pour stocker les matrices, comme 
+dans la figure~\ref{ codage M et N } ci-dessous.
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{|l|c|r||l|c|r|} \hline
+      i & j & $m_{ij}$ & j & k & $n_{jk}$\\
+      \hline
+      1 &  1 & 3 & 1 & 1 & 1\\
+      \hline
+      1 & 2 &  2 & 1 & 2 & 5\\
+      \hline
+      2 & 1 & 4 & 1 & 3 & 7\\
+      \hline
+      2 & 2 & 3 & 2 & 1 & 2\\
+      \hline
+      3 & 1 & 5 & 2 & 2 & 6\\
+      \hline
+      3 & 2 & 4 & 2 & 3 & 8\\
+      \hline
+    \end{tabular}
+  \end{center} 
+  \caption{Forme de codage des matrices}
+  \label{ codage M et N }
+\end{figure}
+
+La fonction Map permet de produire une liste d'éléments stockés sous la forme clé-valeur $ (j,(M,i,m_{ij}))$ avec pour clé $j$ et valeur $ (M,i,m_{ij})$ pour chaque $m_{ij}$.
+Et créer pour chaque $n_{jk}$ une liste de clé-valeur $(j,(N,k,n_{jk}))$ avec $j$ pour clé et $(N,k,n_{jk})$ pour valeur.Sachant que $M$, et $N$  sont des marqueurs permettant
+d'identifier la matrice d'origine. On pourrait résumer la fonction map par l'algorithme~\ref{algo_map1} ci-dessous, et le résultat obtenu pour les matrices exemples de la figure~\ref{Matrices M et N} 
+serait donné par la figure~\ref{map1}.
+\begin{algorithm}
+  \caption{Map round 1}
+  \label{algo_map1}
+  \begin{algorithmic}
+    \Require{matrices M et N}
+    \Ensure{Liste de paires (clé, valeur)}
+    \ForAll {$ m_{ij}$}
+    \State Créer la paire $(j,[M,i,m_{ij}])$
+    \EndFor
+    \ForAll {$ n_{jk}$}
+    \State Créer la paire $(j,[N,k,n_{jk}])$
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{|l|c|r|} \hline (j, (M,i,$m_{ij}$)) & (j, (N,k,$n_{jk}$)) \\ \hline (1, (M,1,3)) & (1, (N,1,1)) \\(2, (M,1,2)) & (1, (N,2,5))\\(1, (M,2,4)) &(2, (N,1,2))  \\(2, (M,2,3)) & (2, (N,3,8)) \\(1, (M,3,5))  & (1, (N,3,7)) \\(2, (M,3,4)) & (2, (N,2,6)) \\ \hline
+    \end{tabular}
+    \caption{Map 1}
+    \label{map1}
+  \end{center}
+\end{figure} 
+\littlesectionspace
+Le 1\iere fonction reduce rassemble toutes les clé-valeurs, créés par la fonction map, qui ont la même clé. On peut dire qu'il "réduit", c'est-à-dire met en facteur tous ceux qui ont la même clé $j$.
+, afin de produire la liste des clé-valeur $((i,k), m_{ij} \times n_{jk})$ ayant pour clé $(i,k)$ et valeur $( m_{ij} \times n_{jk})$. L'algorithme~\ref{algo_Reduce1} résume cette fonction. La figure~\ref{reduce1} donne la sortie obtenue après la fonction reduce
+\begin{algorithm}[H]
+  \caption{Reduce round 1}
+  \label{algo_Reduce1}
+  \begin{algorithmic}
+    \Require{liste de paires  (j,[M,i,$m_{ij}$]) et (j,[N,k,$n_{jk}$])}
+    \Ensure{Liste de paires (cl\'{e}, valeur) ((i,k), $m_{ij}$ $\times$ $n_{jk}$)}
+    \ForAll { (j,[M,i,$m_{ij}$]), (j,[N,k,$n_{jk}$])}
+    \State Cr\'{e}er la paire ((i,k), $m_{ij}$ $\times$ $n_{jk}$)
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{|c|c|}
+      \hline
+      \multicolumn{2}{|c|}{((i,k),$m_{ij}$ $\times$ $n_{jk}$)} \\
+      \hline
+      ((1,1), 3$\times$1) & ((2,1), 3$\times$2) \\
+      ((1,2), 3$\times$5) & ((2,2), 3$\times$6) \\
+      ((1,3), 3$\times$7) & ((2,3), 3$\times$8) \\
+      ((1,1), 2$\times$2) & ((3,1), 5$\times$1) \\
+      ((1,2), 2$\times$6) & ((3,2), 5$\times$5) \\
+      ((1,3), 2$\times$8) & ((3,3), 5$\times$7) \\
+      ((2,1), 4$\times$1) & ((3,1), 4$\times$2) \\
+      ((2,2), 4$\times$5) & ((3,2), 4$\times$6) \\
+      ((2,3), 4$\times$7) & ((3,3), 4$\times$8) \\
+      \hline
+    \end{tabular}
+    \caption{Reduce 1}
+    \label{reduce1}
+  \end{center}
+\end{figure}
+
+\littlesectionspace
+La multiplication de matrices se fait en deux étapes car on utilise deux jobs MapReduce. Mais le deuxième job MapReduce peut se résumer, ici  
+à une deuxième fonction reduce seulement, vu que la deuxième fonction map retourne la même sortie que la première fonction reduce.
+Quant à la deuxième fonction reduce, elle rassemble les valeurs qui ont la même clé $(i,k)$, et somme la liste des valeurs associé à cette clé, 
+comme le décrit l'algorithme~\ref{algo_Reduce2} ci-dessous. Nous retrouvons, en sortie une paire du type $((i,k),w)$  avec w la valeur de l'élément à
+la ligne i et à la colonne k de la matrice $P$ avec $P=MN$
+
+\begin{algorithm}[H]
+  \caption{Reduce round 2}
+  \label{algo_Reduce2}
+  \begin{algorithmic}
+    \Require{Liste de paires (cl\'{e}, valeur) ((i,k), $m_{ij}$ $\times$ $n_{jk}$)}
+    \Ensure{Liste de paires (cl\'{e}, valeur) ((i,k), $\sum_{k}$ $m_{ij}$ $\times$ $n_{jk}$)}
+    \ForAll { clé (i,k)}
+    \State Sommer $m_{ij}$ $\times$ $n_{jk}$ ayant la même clé)
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
+\littlesectionspace
+
+Si nous appliquons l'algorithme~\ref{algo_Reduce2} aux matrices de notre exemple, nous obtiendrons les résultats données à la figure~\ref{reduce2}
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{|c|}
+      \hline
+	  ((i,j), $m_{ik}$ x $n_{kj}$) \\
+      \hline
+      ((1,1), 3$\times$1 $+$ 2$\times$2) \\
+      ((1,2), 3$\times$5 $+$ 2$\times$6) \\
+      ((1,3), 3$\times$7 $+$ 2$\times$8) \\
+      ((2,1), 4$\times$1 $+$ 3$\times$2) \\
+      ((2,2), 4$\times$5 $+$ 3$\times$6) \\
+      ((2,3), 4$\times$7 $+$ 2$\times$8) \\
+      ((3,1), 5$\times$1 $+$ 4$\times$2) \\
+      ((3,2), 5$\times$5 $+$ 4$\times$6) \\
+      ((3,3), 5$\times$7 $+$ 4$\times$8) \\             
+      \hline
+    \end{tabular}
+    \caption{Reduce 2}
+    \label{reduce2}
+  \end{center}
+\end{figure}
+
+\subsection{Multiplication de matrices via MapReduce en une étape}
+
+On utilise toujours les mêmes matrices M et N de la figure~\ref{ Matrices M et N} comme exemple.\par 
+La manière de stocker les éléments de la matrice M et N , ne diffère pas entre la version à deux étapes et celle à une seule étape. 
+La fonction map de la version à une seule étape, permet de fabriquer une liste de clé-valeur $((i,k),(M,j,m_{ij}))$
+pour tout $m_{ij}$ de la matrice M  avec k qui varie de 1 jusqu'au nombre de colonne de N. Il fabrique également la liste de clé-valeur $((i,k),(N,j,n_{jk}))$
+pour tout $n_{jk}$ de la matrice N avec i qui varie de  1 jusqu'au nombre de ligne de M. (voir algorithme~\ref{algo_map OneStep} )
+\begin{algorithm}[H]
+  \caption{Map}
+  \label{algo_map OneStep}
+  \begin{algorithmic}
+    \Require{matrices M et N}
+    \Ensure{Liste de paires (cl\'{e}, valeur)}
+    \ForAll {$ m_{ij}$}
+    \State \ForAll {k ,colonne de N}
+    \State Cr\'{e}er la paire $((i,k),[M,j,m_{ij}])$
+    \EndFor
+    \EndFor
+    \ForAll {$ n_{jk}$}
+	\State \ForAll {i ,ligne de M}
+    \State Cr\'{e}er la paire $((i,k),[N,j,n_{jk}])$
+    \EndFor
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
+
+Avec les matrices de la figure~\ref{Matrices M et N} comme données d'entrée, nous obtiendrons, les tuples  de la figure~\ref{map_one_step}
+\littlesectionspace
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{|c|c|}
+      \hline
+	  ((i,k),(M,j,$m_{ij}$)): $1 \leq k \leq$ nb de colonnes de N  & ((i,k),(N,j,$n_{jk}$)): $1 \leq i \leq$ nb de lignes de M \\
+      \hline
+      ((1,1), (M,1,3)) & ((1,1), (N,1,1)) \\
+      ((1,2), (M,1,3)) & ((2,1), (N,1,1))\\
+      ((1,3), (M,1,3)) & ((3,1), (N,1,1))\\
+      ((1,1), (M,2,2)) & ((1,1), (N,2,2)) \\ 
+      ((1,2), (M,2,2)) & ((2,1), (N,2,2)) \\
+      ((1,3), (M,2,2)) & ((3,1), (N,2,1))   \\        
+      ((2,1), (M,1,4)) & ((1,2), (N,1,5)) \\
+      ((2,2), (M,1,4)) & ((2,2), (N,1,5))\\
+      ((2,3), (M,1,4)) & ((3,2), (N,1,5))\\
+      ((2,1), (M,2,3)) & ((1,2), (N,2,6)) \\ 
+      ((2,2), (M,2,3)) & ((2,2), (N,2,6)) \\
+      ((2,3), (M,2,3)) & ((3,2), (N,2,6))   \\ 
+      ((3,1), (M,1,5)) & ((1,3), (N,1,7)) \\
+      ((3,2), (M,1,5)) & ((2,3), (N,1,7))\\
+      ((3,3), (M,1,5)) & ((3,3), (N,1,7))\\
+      ((3,1), (M,2,4)) & ((1,3), (N,2,8)) \\ 
+      ((3,2), (M,2,4)) & ((2,3), (N,2,8)) \\
+      ((3,3), (M,2,4)) & ((3,3), (N,2,8))   \\               
+      \hline
+    \end{tabular}
+    \caption{Map / One Step}
+    \label{map_one_step}
+  \end{center}
+\end{figure}
+     
+\littlesectionspace
+La fonction reduce, rassemble les tuples qui possède la même clé $(i,k)$. Pour chaque $(i,k)$, il crée une liste A de $(M,j,m_{ij})$ et une liste B de $(N,j,n_{jk})$,
+toute les deux, triées selon la valeur $j$. La j\ieme valeur de chaque liste doit multiplier leur troisième composant c'est-à-dire $m_{ij}$ et $n_{kj}$. Puis on additionne
+les j produits obtenus, comme le résume l'algorithme~\ref{algo_reduce OneStep}.   
+\begin{algorithm}[H]
+  \caption{Reduce}
+  \label{algo_reduce OneStep}
+  \begin{algorithmic}
+    \Require{Liste de paires (cl\'{e}, valeur)}
+    \Ensure{Liste de paires (cl\'{e}, valeur) ((i,k), $\sum_{k}$ $m_{ij}$ $\times$ $n_{jk}$))}
+    \ForAll {$ (i,k)$}
+    \State Cr\'{e}er une liste triée selon j de $[M,j,m_{ij}]$
+    \State Cr\'{e}er une liste triée selon j de $[N,j,n_{jk}]$
+    \EndFor
+    \State Multiplier les jeme termes $n_{jk}$ et $m_{ij}$ de chaque liste
+    \State Sommer les produits
+  \end{algorithmic}
+\end{algorithm}
+
+\littlesectionspace
+Une illustration de la sortie obtenue par la fonction reduce se trouve figure~\ref{reduce_one_step}
+\begin{figure}[H]
+  \begin{center}
+    \begin{tabular}{|c|c|c|c|c|}
+      \hline
+	  ((i,k) & liste$_{M}$ & liste$_{N}$ &  $m_{ik}$ x $n_{kj}$ & $\sum_{k}$ $m_{ij}$ $\times$ $n_{jk}$ \\
+      \hline
+      (1,1) & [(M,1,3),(M,2,2)] & [(N,1,1),(N,2,2)] & 3$\times$1, 2$\times$2 & 3$\times$1 $+$ 1$\times$2 \\
+      (1,2) & [(M,1,3),(M,2,2)] & [(N,1,5),(N,2,6)] & 3$\times$5, 2$\times$6 & 3$\times$2 $+$ 5$\times$6 \\
+      (1,3) & [(M,1,3),(M,2,2)] & [(N,1,7),(N,2,8)] & 3$\times$7, 2$\times$8 & 3$\times$1 $+$ 1$\times$2 \\
+      (2,1) & [(M,1,4),(M,2,3)] & [(N,1,1),(N,2,2)] & 4$\times$1, 3$\times$2 & 4$\times$1 $+$ 3$\times$2 \\
+      (2,2) & [(M,1,4),(M,2,3)] & [(N,1,5),(N,2,6)] & 4$\times$5, 3$\times$6 & 4$\times$5 $+$ 3$\times$6 \\
+      (2,3) & [(M,1,4),(M,2,3)] & [(N,1,7),(N,2,8)] & 4$\times$7, 3$\times$8 & 4$\times$7 $+$ 3$\times$8 \\
+      (3,1) & [(M,1,5),(M,2,4)] & [(N,1,1),(N,2,1)] & 5$\times$1, 4$\times$2 & 5$\times$1 $+$ 4$\times$2 \\
+      (3,2) & [(M,1,5),(M,2,4)] & [(N,1,5),(N,2,6)] & 5$\times$5, 4$\times$6 & 5$\times$5 $+$ 4$\times$7 \\
+      (3,3) & [(M,1,5),(M,2,4)] & [(N,1,7), (N,2,8) & 5$\times$7, 4$\times$8 & 5$\times$7 $+$ 4$\times$8 \\           
+      \hline
+    \end{tabular}
+    \caption{Reduce / One Step}
+    \label{reduce_one_step}
+  \end{center}
+\end{figure}

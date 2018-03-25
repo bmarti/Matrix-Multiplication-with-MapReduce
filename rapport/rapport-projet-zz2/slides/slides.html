@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Slides</title>
+	<meta charset="utf-8" />
+	<link rel="stylesheet" href="reveal.js/css/reveal.css" />
+	<link rel="stylesheet" href="reveal.js/css/theme/white.css" />
+	<link rel="stylesheet" href="plugin/toc-progress/toc-progress.css" />
+</head>
+
+<body>
+	<div class="reveal">
+	<div class="slides">
+<!-- --- BEGIN SLIDES ---------------------------------------------- -->
+	
+<section>
+	<h2>Title1</h2>
+
+	<p>Slide 1</p>
+</section>
+
+<section>
+	<h2>Title2</h2>
+
+	<p>Slide 2</p>
+</section>
+
+
+
+<!-- --- END SLIDES ------------------------------------------------ -->
+	</div> <!-- .slides -->
+	</div> <!-- .reveal -->
+
+	<script src="reveal.js/js/reveal.js"></script>
+	<script src="reveal.js/lib/js/head.min.js"></script>
+
+	<script>
+// --- CONFIGURATION ---------------------------------------------------
+	Reveal.initialize({
+		slideNumber: true,
+		transition: 'none',
+
+
+		math: {
+			mathjax: 'https://cdn.mathjax.org/mathjax/latest/MathJax.js',
+			config: 'TeX-AMS_HTML-full'  // See http://docs.mathjax.org/en/latest/config-files.html
+		},
+		dependencies: [
+			// Cross-browser shim that fully implements classList - https://github.com/eligrey/classList.js/
+			{ src: 'reveal.js/lib/js/classList.js', condition: function() { return !document.body.classList; } },
+
+			{ src: 'plugin/math/math.js', async: true },
+			{ src: 'plugin/toc-progress/toc-progress.js', async: true, callback: function() { toc_progress.initialize(); toc_progress.create(); } },
+		],
+	});
+	</script>
+	
+</body>
+</html>
