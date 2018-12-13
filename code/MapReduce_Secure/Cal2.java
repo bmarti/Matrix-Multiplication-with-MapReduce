@@ -17,10 +17,8 @@ public class Cal2{
 			BigInteger add = m1.multiply(m2);
 			long endTime =System.nanoTime();
 			S = S + (endTime - startTime) ;
-	}
+		}
 		S=S/10000000;
 		System.out.println(" Cx computed in : "+ S +"ns");
 	}
-
-
 }
