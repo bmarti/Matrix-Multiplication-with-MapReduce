@@ -11,7 +11,8 @@ Un script a été implémenté pour installer from scratch une machine virtuelle
 ### Pour le bon fonctionnement du produit de matrice MapReduce One Step non sécurisé:
 -------------------------------------------------------------------------------------
 
-Le produit de matrice effectué est une matrice M par une matrice N : M*N.
+Le produit de matrice est effectué entre une matrice de dimension M et une matrice de dimension N : M*N.
+M et N deux entiers strictement positifs.
 
 Suivre ces étapes <u>avant</u> d'exécuter le script du job MapReduce.
 
